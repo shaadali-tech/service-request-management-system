@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
+import { Router } from "express";
+import { requireAuth, requireRole } from "../middleware/auth";
 import {
   createRequest,
   getRequests,
@@ -7,15 +7,47 @@ import {
   updateRequestStatus,
   assignRequest,
   cancelRequest,
-} from '../controllers/requestController';
+} from "../controllers/requestController";
 
 const router = Router();
 
-router.post('/', requireAuth, createRequest);
-router.get('/', requireAuth, getRequests);
-router.get('/:id', getRequestById);
-router.patch('/:id/status', requireAuth, updateRequestStatus);
-router.put('/:id/assign', requireAuth, assignRequest);
-router.post('/:id/cancel', requireAuth, cancelRequest);
+/*
+|--------------------------------------------------------------------------
+| User Routes
+|--------------------------------------------------------------------------
+*/
+
+// Create a new service request
+router.post("/", requireAuth, createRequest);
+
+// Get requests
+// - Admin: All requests
+// - User: Only their own requests (handled in controller)
+router.get("/", requireAuth, getRequests);
+
+// Get a specific request
+// - Admin: Any request
+// - User: Only their own request (handled in controller)
+router.get("/:id", requireAuth, getRequestById);
+
+// Cancel own request
+router.post("/:id/cancel", requireAuth, cancelRequest);
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+
+// Update request status
+router.patch(
+  "/:id/status",
+  requireAuth,
+  requireRole("ADMIN"),
+  updateRequestStatus,
+);
+
+// Assign request to a support/admin user
+router.put("/:id/assign", requireAuth, requireRole("ADMIN"), assignRequest);
 
 export default router;

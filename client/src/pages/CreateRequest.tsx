@@ -1,20 +1,28 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/api';
-import { AlertCircle, CheckCircle, FileText, Send, ArrowLeft, Sparkles, RefreshCw } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/api";
+import {
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  Send,
+  ArrowLeft,
+  Sparkles,
+  RefreshCw,
+} from "lucide-react";
 
 export const CreateRequest: React.FC = () => {
   const navigate = useNavigate();
-  
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('OTHER');
-  const [priority, setPriority] = useState('MEDIUM');
 
-  const [aiSummary, setAiSummary] = useState('');
-  const [aiSuggestedCategory, setAiSuggestedCategory] = useState('');
-  const [aiSuggestedPriority, setAiSuggestedPriority] = useState('');
-  const [aiReason, setAiReason] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("OTHER");
+  const [priority, setPriority] = useState("MEDIUM");
+
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiSuggestedCategory, setAiSuggestedCategory] = useState("");
+  const [aiSuggestedPriority, setAiSuggestedPriority] = useState("");
+  const [aiReason, setAiReason] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [loadingAI, setLoadingAI] = useState(false);
@@ -23,33 +31,37 @@ export const CreateRequest: React.FC = () => {
 
   const handleAIAnalyze = async () => {
     if (!title || !description) {
-      setError('Please provide both Title and Description before requesting AI analysis.');
+      setError(
+        "Please provide both Title and Description before requesting AI analysis.",
+      );
       return;
     }
-    
+
     setError(null);
     setLoadingAI(true);
 
     try {
-      const response = await api.post('/ai/analyze', { title, description });
+      const response = await api.post("/ai/analyze-request", {
+        title,
+        description,
+      });
 
-      const {
-        aiSummary: fetchedSummary,
-        aiSuggestedCategory: fetchedCategory,
-        aiSuggestedPriority: fetchedPriority,
-        aiReason: fetchedReason
-      } = response.data;
+      const { summary, suggestedCategory, suggestedPriority, reason } =
+        response.data;
 
-      setAiSummary(fetchedSummary || 'No summary returned');
-      setAiSuggestedCategory(fetchedCategory || 'OTHER');
-      setAiSuggestedPriority(fetchedPriority || 'MEDIUM');
-      setAiReason(fetchedReason || 'No reasoning provided');
-      
-      setCategory(fetchedCategory || 'OTHER');
-      setPriority(fetchedPriority || 'MEDIUM');
-      setLoadingAI(false);
+      setAiSummary(summary);
+      setAiSuggestedCategory(suggestedCategory);
+      setAiSuggestedPriority(suggestedPriority);
+      setAiReason(reason);
+
+      setCategory(suggestedCategory);
+      setPriority(suggestedPriority);
     } catch (err: any) {
-      setError(`AI analysis failed: ${err.response?.data?.error || err.message}`);
+      setError(
+        `AI analysis failed: ${err.response?.data?.error || err.message}`,
+      );
+    } finally {
+      setLoadingAI(false);
     }
   };
 
@@ -60,7 +72,7 @@ export const CreateRequest: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/requests', {
+      const response = await api.post("/requests", {
         title,
         description,
         category,
@@ -70,18 +82,22 @@ export const CreateRequest: React.FC = () => {
         aiSuggestedPriority,
       });
 
-      setSuccess(`Request created successfully! Reference: ${response.data.requestNumber}`);
-      
-      setTitle('');
-      setDescription('');
-      setCategory('OTHER');
-      setPriority('MEDIUM');
-      setAiSummary('');
-      setAiSuggestedCategory('');
-      setAiSuggestedPriority('');
-      setAiReason('');
+      setSuccess(
+        `Request created successfully! Reference: ${response.data.requestNumber}`,
+      );
+
+      setTitle("");
+      setDescription("");
+      setCategory("OTHER");
+      setPriority("MEDIUM");
+      setAiSummary("");
+      setAiSuggestedCategory("");
+      setAiSuggestedPriority("");
+      setAiReason("");
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to submit service request.');
+      setError(
+        err.response?.data?.error || "Failed to submit service request.",
+      );
     } finally {
       setLoading(false);
     }
@@ -103,8 +119,12 @@ export const CreateRequest: React.FC = () => {
             <FileText className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Raise Service Request</h1>
-            <p className="text-sm text-slate-500">Submit your ticket with AI-assisted priority suggestions.</p>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Raise Service Request
+            </h1>
+            <p className="text-sm text-slate-500">
+              Submit your ticket with AI-assisted priority suggestions.
+            </p>
           </div>
         </div>
 
@@ -155,7 +175,9 @@ export const CreateRequest: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Category
+                  </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -170,7 +192,9 @@ export const CreateRequest: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Priority
+                  </label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
@@ -191,7 +215,8 @@ export const CreateRequest: React.FC = () => {
                 <span>AI Ticket Analyzer</span>
               </div>
               <p className="text-xs text-slate-500">
-                Analyze your input to generate a concise summary and suggested configuration metrics.
+                Analyze your input to generate a concise summary and suggested
+                configuration metrics.
               </p>
 
               <button
@@ -215,21 +240,35 @@ export const CreateRequest: React.FC = () => {
               {aiSummary && (
                 <div className="border-t border-slate-200 pt-3 space-y-2 text-xs">
                   <div>
-                    <span className="font-semibold text-slate-700 block">AI Summary:</span>
+                    <span className="font-semibold text-slate-700 block">
+                      AI Summary:
+                    </span>
                     <span className="text-slate-600 italic">"{aiSummary}"</span>
                   </div>
                   <div>
-                    <span className="font-semibold text-slate-700 block">Suggested Category:</span>
-                    <span className="text-brand-600 font-semibold">{aiSuggestedCategory}</span>
+                    <span className="font-semibold text-slate-700 block">
+                      Suggested Category:
+                    </span>
+                    <span className="text-brand-600 font-semibold">
+                      {aiSuggestedCategory}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-semibold text-slate-700 block">Suggested Priority:</span>
-                    <span className="text-brand-600 font-semibold">{aiSuggestedPriority}</span>
+                    <span className="font-semibold text-slate-700 block">
+                      Suggested Priority:
+                    </span>
+                    <span className="text-brand-600 font-semibold">
+                      {aiSuggestedPriority}
+                    </span>
                   </div>
                   {aiReason && (
                     <div>
-                      <span className="font-semibold text-slate-700 block">AI Reasoning:</span>
-                      <p className="text-slate-500 leading-normal">{aiReason}</p>
+                      <span className="font-semibold text-slate-700 block">
+                        AI Reasoning:
+                      </span>
+                      <p className="text-slate-500 leading-normal">
+                        {aiReason}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -244,7 +283,7 @@ export const CreateRequest: React.FC = () => {
               className="flex items-center space-x-2 bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-md transition"
             >
               <Send className="h-4 w-4" />
-              <span>{loading ? 'Submitting...' : 'Submit Request'}</span>
+              <span>{loading ? "Submitting..." : "Submit Request"}</span>
             </button>
           </div>
         </form>
